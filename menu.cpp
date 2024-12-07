@@ -1,100 +1,350 @@
 #include <iostream>
+#include <chrono>
 
 #include "file_generator.h"
-#include "menu_functions.h"
+#include "sequence.h"
+#include "people.h"
+#include "comparings.h"
+#include "dynamic_array.h"
+#include "sortings.h"
+#include "file_reader.h"
+#include "file_writer.h"
+#include "graph_builder.h"
+#include "functional_tests.h"
 
 using namespace std;
 
-
-void Menu()
+int Functions()
 {
-    Functions();
-
-    bool isOpen = true;
+    cout << "Menu:\n\n";
+    cout << "0. Exit\n";
+    cout << "1. Generate people file\n";
+    cout << "2. Sort by one attribute\n";
+    cout << "3. Sort by two attributes\n";
+    cout << "4. Build graph\n";
+    cout << "5. Run functional tests\n\n";
+    cout << "Insert number of function:";
 
     int function;
 
+    cin >> function;
+
+    return function;
+}
+
+int ChooseSorting()
+{
+    cout << "List of available sortings:\n\n";
+    cout << "1. Bubble Sort\n";
+    cout << "2. Shaker Sort\n";
+    cout << "3. Heap Sort\n";
+    cout << "4. Merge Sort\n";
+    cout << "5. Quick Sort\n\n";
+    cout << "Insert number of sorting:";
+
+    int sorting;
+
+    cin >> sorting;
+
+    return sorting;
+}
+
+int ChooseAttribute()
+{
+    cout << "List of attributes:\n\n";
+    cout << "1. Name\n";
+    cout << "2. Last name\n";
+    cout << "3. Patronymic\n";
+    cout << "4. Birth date\n";
+    cout << "5. Account balance\n\n";
+    cout << "Insert number of attribute: ";
+
+    int attribute;
+
+    cin >> attribute;
+
+    return attribute;
+}
+
+void Menu()
+{
+    bool isOpen = true;
+
+    int sortingChoice;
+    int attributesChoice;
+
+    int firstAttributeChoice;
+    int secondAttributeChoice;
+
+    int (*firstCompareFunc)(const People&, const People&) = nullptr;
+    int (*secondCompareFunc)(const People&, const People&) = nullptr;
+    int (*compareFunc)(const People&, const People&) = nullptr;
+
+    chrono::duration<double> duration;
+    chrono::time_point<chrono::high_resolution_clock> start, end;
+
+    string fileNameIn;
+    string fileNameOut;
+
+    DynamicArray<People> dynamicArray;
+
+    Sorter<People> sorter;
+
+    Sequence<People> *sequence = &dynamicArray;
+
     while (isOpen)
     {
-        cin >> function;
+        int function = Functions();
 
-        if ((function < 0) || (function > 13))
+        switch(function)
         {
-            cout << "Wrong number input, please, try again.\n";
-            Functions();
-        }
-        else
-        {
-            switch (function)
+            default:
+                cout << "Wrong number function input\n\n";
+                continue;
+
+            case (0):
+                exit(0);
+
+            case (1):
+                Generator();
+                break;
+
+            case (2):
             {
-                case (0):
-                    exit(0);
+                cout << "Write file name to sort\n";
+                cin >> fileNameIn;
 
-                case (1):
-                    //LoadFunctionalTests();
-                    Functions();
-                    break;
+                cout << "Write file name to save the result\n";
+                cin >> fileNameOut;
 
-                case (2):
-                    Generator();
-                    Functions();
-                    break;
+                cout << "Read data from the file " << fileNameIn << std::endl;
+                ReadDynamicArrayFromFile(fileNameIn, &dynamicArray);
 
-                case (3):
-                    LoadBubbleSort();
-                    Functions();
-                    break;
+                int (*compareFunction)(const People &, const People &) = nullptr;
 
-                case (4):
-                    LoadShakerSort();
-                    Functions();
-                    break;
+                sortingChoice = ChooseSorting();
 
-                case (5):
-                    LoadMergeSort();
-                    Functions();
-                    break;
+                attributesChoice = ChooseAttribute();
 
-                case (6):
-                    LoadHeapSort();
-                    Functions();
+                if (attributesChoice == 1)
+                {
+                    compareFunction = CompareByFirstName;
+                }
+                else if (attributesChoice == 2)
+                {
+                    compareFunction = CompareByLastName;
+                }
+                else if (attributesChoice == 3)
+                {
+                    compareFunction = CompareByPatronymic;
+                }
+                else if (attributesChoice == 4)
+                {
+                    compareFunction = CompareByBirthDate;
+                }
+                else if (attributesChoice == 5)
+                {
+                    compareFunction = CompareByAccountBalance;
+                }
+                else
+                {
+                    cout << "Wrong attribute number input, please, try again\n\n";
                     break;
+                }
 
-                case (7):
-                    LoadQuickSort();
-                    Functions();
-                    break;
+                start = chrono::high_resolution_clock::now();
 
-                case(8):
-                    LoadAllMethods();
-                    Functions();
+                if (sortingChoice == 1)
+                {
+                    sorter.BubbleSort(sequence, compareFunction);
+                }
+                else if (sortingChoice == 2)
+                {
+                    sorter.ShakerSort(sequence, compareFunction);
+                }
+                else if (sortingChoice == 3)
+                {
+                    sorter.HeapSort(sequence, compareFunction);
+                }
+                else if (sortingChoice == 4)
+                {
+                    sorter.MergeSort(sequence, compareFunction);
+                }
+                else if (sortingChoice == 5)
+                {
+                    sorter.QuickSort(sequence, compareFunction);
+                }
+                else
+                {
+                    cout << "Wrong sorting number input, please, try again\n\n";
                     break;
+                }
 
-                case (9):
-                    GraphForBubbleSort();
-                    Functions();
-                    break;
+                end = chrono::high_resolution_clock::now();
+                duration = end - start;
 
-                case (10):
-                    GraphForShakerSort();
-                    Functions();
-                    break;
+                cout << "Sorting completed in " << duration.count() << " seconds.\n";
 
-                case (11):
-                    GraphForMergeSort();
-                    Functions();
-                    break;
+                WriteSequenceToFile(fileNameOut, sequence);
 
-                case (12):
-                    GraphForHeapSort();
-                    Functions();
-                    break;
-
-                case (13):
-                    GraphForQuickSort();
-                    Functions();
-                    break;
+                break;
             }
+
+            case (3):
+            {
+                cout << "Write file name to sort\n";
+                cin >> fileNameIn;
+
+                cout << "Write file name to save the result\n";
+                cin >> fileNameOut;
+
+                cout << "Read data from the file " << fileNameIn << std::endl;
+                ReadDynamicArrayFromFile(fileNameIn, &dynamicArray);
+
+                sortingChoice = ChooseSorting();
+
+                firstAttributeChoice = ChooseAttribute();
+                secondAttributeChoice = ChooseAttribute();
+
+                if (firstAttributeChoice == 1 && secondAttributeChoice == 2)
+                {
+                    compareFunc = CompareByTwoAttributesWrapper;
+                }
+                else if (firstAttributeChoice == 1 && secondAttributeChoice == 5)
+                {
+                    compareFunc = CompareByStringAndIntWrapper;
+                }
+                else if (firstAttributeChoice == 4 && secondAttributeChoice == 5)
+                {
+                    compareFunc = CompareByStringAndIntWrapper2;
+                }
+                else if (firstAttributeChoice == 5 && secondAttributeChoice == 4) {
+                    compareFunc = CompareByIntAndStringWrapper;
+                }
+                else {
+                    cout << "Invalid attribute combination selected. Please try again.\n\n";
+                    break;
+                }
+
+
+                if (sortingChoice == 1)
+                {
+                    sorter.BubbleSort(sequence, compareFunc);
+                }
+                else if (sortingChoice == 2)
+                {
+                    sorter.ShakerSort(sequence, compareFunc);
+                }
+                else if (sortingChoice == 3)
+                {
+                    sorter.HeapSort(sequence, compareFunc);
+                }
+                else if (sortingChoice == 4)
+                {
+                    sorter.MergeSort(sequence, compareFunc);
+                }
+                else if (sortingChoice == 5)
+                {
+                    sorter.QuickSort(sequence, compareFunc);
+                }
+                else
+                {
+                    cout << "Wrong sorting number input, please, try again.\n\n";
+                    break;
+                }
+
+                end = chrono::high_resolution_clock::now();
+                duration = end - start;
+
+                cout << "Sorting completed in " << duration.count() << " seconds.\n";
+
+                WriteSequenceToFile(fileNameOut, sequence);
+
+                break;
+            }
+
+            case (4):
+            {
+                sortingChoice = ChooseSorting();
+
+                string name;
+
+                const int max = 500000;
+                const int step = 50000;
+
+                int iteration = 1;
+
+                DynamicArray<double> x(0);  // X - size
+                DynamicArray<double> y(0);  // Y - time
+
+                for (int i = step; i <= max; i += step)
+                {
+                    DynamicArray<People> peoples(i);
+
+                    for (int j = 0; j < i; j++)
+                    {
+                        People people = People();
+                        peoples[j] = people;
+                    }
+
+                    cout << "Sorting\n";
+                    start = chrono::high_resolution_clock::now();
+
+                    if (sortingChoice == 1)
+                    {
+                        sorter.BubbleSort(&peoples, CompareByAccountBalance);
+                        name = "Bubble Sort";
+                    }
+                    else if (sortingChoice == 2)
+                    {
+                        sorter.ShakerSort(&peoples, CompareByAccountBalance);
+                        name = "Shaker Sort";
+                    }
+                    else if (sortingChoice == 3)
+                    {
+                        sorter.HeapSort(&peoples, CompareByAccountBalance);
+                        name = "Heap Sort";
+                    }
+                    else if (sortingChoice == 4)
+                    {
+                        sorter.MergeSort(&peoples, CompareByAccountBalance);
+                        name = "Merge Sort";
+                    }
+                    else if (sortingChoice == 5)
+                    {
+                        sorter.QuickSort(&peoples, CompareByAccountBalance);
+                        name = "Quick Sort";
+                    }
+                    else
+                    {
+                        cout << "Wrong sorting number input, please, try again.\n\n";
+                        break;
+                    }
+
+                    end = chrono::high_resolution_clock::now();
+                    duration = end - start;
+
+                    x.Append(i);
+                    y.Append(duration.count());
+
+                    cout << iteration << ") Sorting " << i << " elements took " << duration.count() << " seconds.\n\n";
+
+                    iteration++;
+                }
+
+                cout << "Plotting Graph\n\n";
+                cout << "Graph has been succesfully built!\n\n";
+
+                BuildGraph(x, y, name);
+
+                break;
+            }
+            case (5):
+
+                TestSorters();
+
+                cout << "\n";
+                break;
         }
     }
 }

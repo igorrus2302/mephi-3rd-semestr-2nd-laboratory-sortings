@@ -6,6 +6,7 @@ template <class T>
 class DynamicArray : public Sequence<T>
 {
 private:
+
     T* data;
     int size;
 
@@ -26,11 +27,15 @@ private:
     }
 
 public:
-    class DynamicArrayIterator : public Sequence<T>::Iterator {
+
+    class DynamicArrayIterator : public Sequence<T>::Iterator{
+
     private:
+
         T* current;
 
     public:
+
         DynamicArrayIterator(T* current) : current(current) { }
 
         bool operator==(const typename Sequence<T>::Iterator& other) const override
@@ -120,12 +125,11 @@ public:
         return data[index];
     }
 
-    void Swap(T& a, T& b) override
+    void Swap(int index1, int index2) override
     {
-        T temp = a;
-        a = b;
-        b = temp;
+        std::swap(data[index1], data[index2]);
     }
+
 
     void Set(int index, T value) override
     {
@@ -191,13 +195,14 @@ public:
     {
         Resize(size + 1);
 
-        for (int i = size - 1; i > index; i--)
+        for (int i = size - 1; i > index; --i)
         {
             Set(i, GetElement(i - 1));
         }
 
         Set(index, data);
     }
+
 
     void Union(Sequence<T>* dynamicArray) override
     {
@@ -207,5 +212,12 @@ public:
         {
             Append(dynamicArray->GetElement(i));
         }
+    }
+
+    void Clear()
+    {
+        delete[] data;
+        data = nullptr;
+        size = 0;
     }
 };

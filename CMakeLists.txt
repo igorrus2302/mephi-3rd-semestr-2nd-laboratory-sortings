@@ -9,19 +9,20 @@ add_executable(3semestr_2laboratory main.cpp
         file_reader.h
         graph_builder.cpp
         graph_builder.h
-        isorted.h
+        isorter.h
         main.cpp
         people.h
         names.h
         sequence.h
         sortings.h
-        sorting_methods.h
         menu.cpp
         menu.h
         file_generator.cpp
         file_generator.h
-        menu_functions.cpp
-        menu_functions.h
         file_writer.h
         file_writer.cpp
+        comparings.cpp
+        comparings.h
+        functional_tests.cpp
+        functional_tests.h
 )

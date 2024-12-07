@@ -8,7 +8,7 @@ public:
     virtual T& GetFirstElement() = 0;
     virtual T& GetLastElement() = 0;
     virtual T& GetElement(int index) = 0;
-    virtual void Swap(T& a, T& b) = 0;
+    virtual void Swap(int index1, int index2) = 0;
     virtual void Set(int index, T value) = 0;
     virtual Sequence<T>* GetSubsequence(int startIndex, int endIndex) = 0;
     virtual int GetLength() = 0;

@@ -2,58 +2,108 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+#include <vector>
+#include <string>
+#include <iterator>
 
 #include "dynamic_array.h"
+#include "sequence.h"
 #include "people.h"
 
+using namespace std;
+
+std::vector<std::string> SplitString(const std::string& str)
+{
+    istringstream iss(str);
+    vector<std::string> tokens;
+    string token;
+
+    // Разделение строки по пробелам
+    while (iss >> token) {
+        tokens.push_back(token);
+    }
+
+    return tokens;
+}
 
 Sequence<People>& ReadSequenceFromFile(std::string& fileName, Sequence<People>* sequence)
 {
     std::ifstream file(fileName);
-    if (!file) {
-        std::cout << "Error opening the file!" << std::endl;
+    if (!file)
+    {
+        cout << "Error opening the file!" << std::endl;
         return *sequence;
     }
 
-    int numLines = std::count(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>(), '\n');
-    file.seekg(0, std::ios::beg);
+    string line;
 
-    int i = 0;
-    People* array = new People[numLines];
-    std::string line;
-    int skiped = 0;
+    while (getline(file, line))
+    {
+        auto tokens = SplitString(line);
 
-    while (std::getline(file, line)) {
-        std::istringstream iss(line);
-        std::string firstName, lastName, patronymic, birthDate;
+        if (tokens.size() < 4 || tokens.size() > 5)
+        {
+            std::cout << "Error: Invalid format in line: " << line << std::endl;
+            continue;
+        }
+
+        string lastName;
+        string firstName;
+        string patronymic;
+        string birthDate;
         int accountBalance;
 
-        if (!(iss >> lastName >> firstName >> patronymic >> birthDate >> accountBalance)) {
-            std::cout << "Error reading line: " << line << std::endl;
-            sequence->Append(array, i - skiped);
-            delete[] array;
-            array = new People[numLines - i - 1];
-            i++;
-            skiped = i;
+        try {
+            if (tokens.size() == 4)
+            {
+                lastName = tokens[0];
+                firstName = "Unknown";
+                patronymic = tokens[1];
+                birthDate = tokens[2];
+                accountBalance = std::stoi(tokens[3]);
+            }
+            else if (tokens.size() == 5)
+            {
+                lastName = tokens[0];
+                firstName = tokens[1];
+                patronymic = tokens[2];
+                birthDate = tokens[3];
+                accountBalance = std::stoi(tokens[4]);
+            }
+        } catch (const std::invalid_argument& e) {
+            cout << "Error: Invalid data in line: " << line << std::endl;
             continue;
         }
 
         People person(firstName, lastName, patronymic, birthDate, accountBalance);
-        array[i - skiped] = person;
-        i++;
+        sequence->Append(person);
     }
 
     file.close();
-
-    sequence->Append(array, numLines - skiped);
-    std::cout << "Count elements " << sequence->GetLength() << std::endl;
-
-    delete[] array;
-
     return *sequence;
 }
 
-void ReadDynamicArrayFromFile(std::string& fileName, DynamicArray<People>* sequence)
+void ReadDynamicArrayFromFile(string& fileName, DynamicArray<People>* sequence)
 {
-    sequence = &dynamic_cast<DynamicArray<People>&>(ReadSequenceFromFile(fileName, sequence));
+    Sequence<People>& tempSequence = ReadSequenceFromFile(fileName, sequence);
+
+    for (int i = 0; i < tempSequence.GetLength(); ++i)
+    {
+        People person = tempSequence.GetElement(i);
+        bool exists = false;
+
+        for (int j = 0; j < sequence->GetLength(); ++j)
+        {
+            if (sequence->GetElement(j) == person) {
+                exists = true;
+                break;
+            }
+        }
+
+        if (!exists)
+        {
+            cout << "Appending new element: " << person << std::endl;
+            sequence->Append(person);
+        }
+    }
 }

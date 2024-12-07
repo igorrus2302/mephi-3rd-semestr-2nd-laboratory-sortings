@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iostream>
 #include <string>
 #include <cstdlib>
 
@@ -15,9 +16,7 @@ private:
     std::string birthDate;
     int accountBalance;
 
-
     std::string GenerateRandomBirthDate() {
-
         int day = rand() % 30 + 1;
         int month = rand() % 12 + 1;
         int year = rand() % 65 + 1960;
@@ -37,8 +36,7 @@ public:
         accountBalance = rand() % 1000001;
     }
 
-    People(std::string firstName, std::string lastName, std::string patronymic, std::string birthDate, int accountBalance)
-    {
+    People(std::string firstName, std::string lastName, std::string patronymic, std::string birthDate, int accountBalance) {
         this->firstName = firstName;
         this->lastName = lastName;
         this->patronymic = patronymic;
@@ -46,17 +44,25 @@ public:
         this->accountBalance = accountBalance;
     }
 
-    bool operator<(const People& other) const {return accountBalance < other.accountBalance;}
-    bool operator>(const People& other) const {return accountBalance > other.accountBalance;}
-    bool operator<=(const People& other) const {return accountBalance <= other.accountBalance;}
-    bool operator>=(const People& other) const {return accountBalance >= other.accountBalance;}
-    bool operator==(const People& other) const {return accountBalance == other.accountBalance;}
-    bool operator!=(const People& other) const {return accountBalance != other.accountBalance;}
+    bool operator<(const People& other) const { return accountBalance < other.accountBalance; }
+    bool operator>(const People& other) const { return accountBalance > other.accountBalance; }
+    bool operator<=(const People& other) const { return accountBalance <= other.accountBalance; }
+    bool operator>=(const People& other) const { return accountBalance >= other.accountBalance; }
+    bool operator==(const People& other) const { return accountBalance == other.accountBalance; }
+    bool operator!=(const People& other) const { return accountBalance != other.accountBalance; }
 
-    std::string GetFirstName() {return firstName;}
-    std::string GetLastName() {return lastName;}
-    std::string GetPatronymic() {return patronymic;}
-    std::string GetBirthDate() {return birthDate;}
-    double GetAccountBalance() {return accountBalance;}
+    std::string GetFirstName() const { return firstName; }
+    std::string GetLastName() const { return lastName; }
+    std::string GetPatronymic() const { return patronymic; }
+    std::string GetBirthDate() const { return birthDate; }
+    int GetAccountBalance() const { return accountBalance; }
+
+    friend std::ostream& operator<<(std::ostream& os, const People& person) {
+        os << "Name: " << person.firstName << " " << person.lastName << " " << person.patronymic
+           << ", Birth Date: " << person.birthDate << ", Account Balance: " << person.accountBalance;
+        return os;
+    };
+
 };
+
 

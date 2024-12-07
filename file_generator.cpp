@@ -11,12 +11,14 @@ using namespace std;
 void GenerateRandomFile(int count, string& fileName)
 {
     ofstream file(fileName);
-    if (!file) {
+    if (!file)
+    {
         cerr << "Error opening the file!" << endl;
         return;
     }
 
-    for (int i = 0; i < count; ++i) {
+    for (int i = 0; i < count; ++i)
+    {
         People people = People();
 
         file << people.GetLastName() << " "
@@ -26,7 +28,7 @@ void GenerateRandomFile(int count, string& fileName)
              << people.GetAccountBalance() << "\n";
     }
 
-    cout << "The data have been successfully written to the file " << fileName << endl;
+    cout << "The data have been successfully written to the file " << fileName <<  "\n\n" << endl;
 
     file.close();
 }

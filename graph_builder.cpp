@@ -4,12 +4,15 @@
 
 #include "dynamic_array.h"
 
+//добавить постановку точек на графиках
+//переделать класс people персон из-за множественного числа
 
 void BuildGraph(DynamicArray<double>& x, DynamicArray<double>& y, std::string name)
 {
     FILE* gnuplotPipe = _popen("gnuplot -persistent", "w");
 
-    if (!gnuplotPipe) {
+    if (!gnuplotPipe)
+    {
         std::cerr << "Failed to launch Gnuplot." << std::endl;
         return;
     }
