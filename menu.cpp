@@ -255,9 +255,6 @@ void Menu()
                     break;
                 }
 
-                cout << sequence->GetLength() << "\n";
-
-
                 if (sortingChoice == 1)
                 {
                     sorter.BubbleSort(sequence, compareFunc);
@@ -289,8 +286,6 @@ void Menu()
 
                 cout << "Sorting completed in " << duration.count() << " seconds.\n\n";
 
-                cout << sequence->GetLength() << "\n";
-
                 WriteSequenceToFile(fileNameOut, sequence);
 
                 break;
@@ -304,6 +299,7 @@ void Menu()
 
                 const int max = 50000;
                 const int step = 5000;
+                int dots = 1000;
 
                 int iteration = 1;
 
