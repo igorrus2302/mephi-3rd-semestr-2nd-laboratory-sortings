@@ -2,13 +2,13 @@
 #include <chrono>
 
 #include "file_generator.h"
-#include "sequence.h"
-#include "people.h"
-#include "comparings.h"
-#include "dynamic_array.h"
-#include "sortings.h"
 #include "file_reader.h"
 #include "file_writer.h"
+#include "sequence.h"
+#include "dynamic_array.h"
+#include "people.h"
+#include "comparings.h"
+#include "sortings.h"
 #include "graph_builder.h"
 #include "functional_tests.h"
 
@@ -46,6 +46,8 @@ int ChooseSorting()
 
     cin >> sorting;
 
+    cout << "\n";
+
     return sorting;
 }
 
@@ -62,6 +64,8 @@ int ChooseAttribute()
     int attribute;
 
     cin >> attribute;
+
+    cout << "\n";
 
     return attribute;
 }
@@ -118,6 +122,8 @@ void Menu()
                 cin >> fileNameOut;
 
                 cout << "Read data from the file " << fileNameIn << std::endl;
+                cout << "\n\n";
+
                 ReadDynamicArrayFromFile(fileNameIn, &dynamicArray);
 
                 int (*compareFunction)(const People &, const People &) = nullptr;
@@ -183,7 +189,7 @@ void Menu()
                 end = chrono::high_resolution_clock::now();
                 duration = end - start;
 
-                cout << "Sorting completed in " << duration.count() << " seconds.\n";
+                cout << "Sorting completed in " << duration.count() << " seconds.\n\n";
 
                 WriteSequenceToFile(fileNameOut, sequence);
 
@@ -199,6 +205,8 @@ void Menu()
                 cin >> fileNameOut;
 
                 cout << "Read data from the file " << fileNameIn << std::endl;
+                cout << "\n\n";
+
                 ReadDynamicArrayFromFile(fileNameIn, &dynamicArray);
 
                 sortingChoice = ChooseSorting();
@@ -206,7 +214,7 @@ void Menu()
                 firstAttributeChoice = ChooseAttribute();
                 secondAttributeChoice = ChooseAttribute();
 
-                if (firstAttributeChoice == 1 && secondAttributeChoice == 2)
+                if (firstAttributeChoice == 1 && (secondAttributeChoice == 2 || secondAttributeChoice == 3 || secondAttributeChoice == 4))
                 {
                     compareFunc = CompareByTwoAttributesWrapper;
                 }
@@ -214,17 +222,40 @@ void Menu()
                 {
                     compareFunc = CompareByStringAndIntWrapper;
                 }
+                else if (firstAttributeChoice == 2 && (secondAttributeChoice == 1 || secondAttributeChoice == 3 || secondAttributeChoice == 4))
+                {
+                    compareFunc = CompareByTwoAttributesWrapper;
+                }
+                else if (firstAttributeChoice == 2 && secondAttributeChoice == 5)
+                {
+                    compareFunc = CompareByStringAndIntWrapper;
+                }
+                else if (firstAttributeChoice == 3 && (secondAttributeChoice == 1 || secondAttributeChoice == 2 || secondAttributeChoice == 4))
+                {
+                    compareFunc = CompareByTwoAttributesWrapper;
+                }
+                else if (firstAttributeChoice == 3 && secondAttributeChoice == 5)
+                {
+                    compareFunc = CompareByStringAndIntWrapper;
+                }
+                else if (firstAttributeChoice == 4 && (secondAttributeChoice == 1 || secondAttributeChoice == 2 || secondAttributeChoice == 3))
+                {
+                    compareFunc = CompareByTwoAttributesWrapper;
+                }
                 else if (firstAttributeChoice == 4 && secondAttributeChoice == 5)
                 {
-                    compareFunc = CompareByStringAndIntWrapper2;
+                    compareFunc = CompareByStringAndIntWrapper;
                 }
-                else if (firstAttributeChoice == 5 && secondAttributeChoice == 4) {
+                else if (firstAttributeChoice == 5 && (secondAttributeChoice == 1 || secondAttributeChoice == 2 || secondAttributeChoice == 3 || secondAttributeChoice == 4)) {
                     compareFunc = CompareByIntAndStringWrapper;
                 }
-                else {
+                else
+                {
                     cout << "Invalid attribute combination selected. Please try again.\n\n";
                     break;
                 }
+
+                cout << sequence->GetLength() << "\n";
 
 
                 if (sortingChoice == 1)
@@ -256,7 +287,9 @@ void Menu()
                 end = chrono::high_resolution_clock::now();
                 duration = end - start;
 
-                cout << "Sorting completed in " << duration.count() << " seconds.\n";
+                cout << "Sorting completed in " << duration.count() << " seconds.\n\n";
+
+                cout << sequence->GetLength() << "\n";
 
                 WriteSequenceToFile(fileNameOut, sequence);
 
@@ -269,8 +302,8 @@ void Menu()
 
                 string name;
 
-                const int max = 500000;
-                const int step = 50000;
+                const int max = 50000;
+                const int step = 5000;
 
                 int iteration = 1;
 
@@ -279,12 +312,11 @@ void Menu()
 
                 for (int i = step; i <= max; i += step)
                 {
-                    DynamicArray<People> peoples(i);
+                    std::unique_ptr<DynamicArray<People>> peoples = std::make_unique<DynamicArray<People>>(i);
 
                     for (int j = 0; j < i; j++)
                     {
-                        People people = People();
-                        peoples[j] = people;
+                        (*peoples)[j] = People();
                     }
 
                     cout << "Sorting\n";
@@ -292,27 +324,27 @@ void Menu()
 
                     if (sortingChoice == 1)
                     {
-                        sorter.BubbleSort(&peoples, CompareByAccountBalance);
+                        sorter.BubbleSort(peoples.get(), CompareByAccountBalance);
                         name = "Bubble Sort";
                     }
                     else if (sortingChoice == 2)
                     {
-                        sorter.ShakerSort(&peoples, CompareByAccountBalance);
+                        sorter.ShakerSort(peoples.get(), CompareByAccountBalance);
                         name = "Shaker Sort";
                     }
                     else if (sortingChoice == 3)
                     {
-                        sorter.HeapSort(&peoples, CompareByAccountBalance);
+                        sorter.HeapSort(peoples.get(), CompareByAccountBalance);
                         name = "Heap Sort";
                     }
                     else if (sortingChoice == 4)
                     {
-                        sorter.MergeSort(&peoples, CompareByAccountBalance);
+                        sorter.MergeSort(peoples.get(), CompareByAccountBalance);
                         name = "Merge Sort";
                     }
                     else if (sortingChoice == 5)
                     {
-                        sorter.QuickSort(&peoples, CompareByAccountBalance);
+                        sorter.QuickSort(peoples.get(), CompareByAccountBalance);
                         name = "Quick Sort";
                     }
                     else
@@ -333,7 +365,7 @@ void Menu()
                 }
 
                 cout << "Plotting Graph\n\n";
-                cout << "Graph has been succesfully built!\n\n";
+                cout << "Graph has been successfully built!\n\n";
 
                 BuildGraph(x, y, name);
 
@@ -343,7 +375,7 @@ void Menu()
 
                 TestSorters();
 
-                cout << "\n";
+                cout << "\n\n";
                 break;
         }
     }

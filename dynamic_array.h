@@ -89,7 +89,7 @@ public:
         data = new T[size];
     }
 
-    DynamicArray(DynamicArray<T>& dynamicArray)
+    DynamicArray(const DynamicArray<T>& dynamicArray)
     {
         size = dynamicArray.size;
         data = new T[size];
@@ -136,28 +136,23 @@ public:
         data[index] = value;
     }
 
-    DynamicArray<T>* GetSubsequence(int startIndex, int endIndex) override
+    Sequence<T>* GetSubsequence(int startIndex, int endIndex) override
     {
         int length;
 
-        if (endIndex > size)
-        {
+        if (endIndex > size) {
             length = size - startIndex;
-        }
-        else
-        {
+        } else {
             length = endIndex - startIndex + 1;
 
-            if (startIndex == 0)
-            {
+            if (startIndex == 0) {
                 length -= 1;
             }
         }
 
         T* items = new T[length];
 
-        for (int i = 0; i < length; i++)
-        {
+        for (int i = 0; i < length; i++) {
             items[i] = GetElement(startIndex + i);
         }
 

@@ -51,6 +51,7 @@ public:
     bool operator==(const People& other) const { return accountBalance == other.accountBalance; }
     bool operator!=(const People& other) const { return accountBalance != other.accountBalance; }
 
+
     std::string GetFirstName() const { return firstName; }
     std::string GetLastName() const { return lastName; }
     std::string GetPatronymic() const { return patronymic; }

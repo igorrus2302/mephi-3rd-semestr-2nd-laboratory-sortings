@@ -15,22 +15,19 @@ void WriteSequenceToFile(std::string& fileName, Sequence<People>* sequence)
         return;
     }
 
-    auto it = sequence->ToBegin();
-    auto end = sequence->ToEnd();
+    int length = sequence->GetLength();
 
-    while (!(*it == *end))
+    for (int i = 0; i < length; ++i)
     {
-        People& person = **it;
+        People& person = sequence->GetElement(i);
         file << person.GetLastName() << " "
              << person.GetFirstName() << " "
              << person.GetPatronymic() << " "
              << person.GetBirthDate() << " "
              << person.GetAccountBalance() << "\n";
-        ++(*it);
     }
 
     std::cout << "The data have been successfully written to the file " << fileName << std::endl;
 
     file.close();
 }
-

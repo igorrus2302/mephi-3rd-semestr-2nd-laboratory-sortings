@@ -5,7 +5,6 @@
 #include "dynamic_array.h"
 
 //добавить постановку точек на графиках
-//переделать класс people персон из-за множественного числа
 
 void BuildGraph(DynamicArray<double>& x, DynamicArray<double>& y, std::string name)
 {

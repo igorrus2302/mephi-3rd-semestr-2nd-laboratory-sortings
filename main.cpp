@@ -1,6 +1,6 @@
 #include "menu.h"
 
-//для третьей лабы graphviz 
+
 int main()
 {
     Menu();
