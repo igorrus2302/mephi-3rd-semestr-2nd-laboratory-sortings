@@ -4,7 +4,6 @@
 
 #include "dynamic_array.h"
 
-//добавить постановку точек на графиках
 
 void BuildGraph(DynamicArray<double>& x, DynamicArray<double>& y, std::string name)
 {
@@ -21,11 +20,22 @@ void BuildGraph(DynamicArray<double>& x, DynamicArray<double>& y, std::string na
     fprintf(gnuplotPipe, "%s", title.c_str());
     fprintf(gnuplotPipe, "set xlabel 'capacity'\n");
     fprintf(gnuplotPipe, "set ylabel 'time'\n");
-    fprintf(gnuplotPipe, "plot '-' with lines title 'Data'\n");
+
+    fprintf(gnuplotPipe, "set grid\n");
+
+    fprintf(gnuplotPipe, "plot '-' with lines lc rgb 'black' title 'Data', '-' with points pt 3 ps 1.5 lc rgb 'red' title 'Points'\n");
 
     for (size_t i = 0; i < x.GetLength(); i++)
     {
         fprintf(gnuplotPipe, "%f %f\n", x[i], y[i]);
+    }
+
+    fprintf(gnuplotPipe, "e\n");
+
+    size_t step = x.GetLength() / 10;
+    for (size_t i = 0; i < 10 && i * step < x.GetLength(); i++)  
+    {
+        fprintf(gnuplotPipe, "%f %f\n", x[i * step], y[i * step]);
     }
 
     fprintf(gnuplotPipe, "e\n");
