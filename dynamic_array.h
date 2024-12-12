@@ -138,25 +138,27 @@ public:
 
     Sequence<T>* GetSubsequence(int startIndex, int endIndex) override
     {
-        int length;
+        int length = (endIndex >= size) ? size - startIndex : endIndex - startIndex + 1;
 
-        if (endIndex > size) {
-            length = size - startIndex;
-        } else {
-            length = endIndex - startIndex + 1;
+        DynamicArray<T>* result = new DynamicArray<T>(length);
+        for (int i = 0; i < length; i++) {
+            result->Set(i, GetElement(startIndex + i));
+        }
 
-            if (startIndex == 0) {
-                length -= 1;
+        return result;
+    }
+
+    DynamicArray& operator=(const DynamicArray& other)
+    {
+        if (this != &other) {
+            delete[] data;
+            size = other.size;
+            data = new T[size];
+            for (int i = 0; i < size; ++i) {
+                data[i] = other.data[i];
             }
         }
-
-        T* items = new T[length];
-
-        for (int i = 0; i < length; i++) {
-            items[i] = GetElement(startIndex + i);
-        }
-
-        return new DynamicArray<T>(items, length);
+        return *this;
     }
 
     int GetLength() override
@@ -198,14 +200,14 @@ public:
         Set(index, data);
     }
 
-
     void Union(Sequence<T>* dynamicArray) override
     {
+        int newElements = dynamicArray->GetLength();
         int oldSize = size;
+        Resize(size + newElements);
 
-        for (int i = 0; i < dynamicArray->GetLength(); i++)
-        {
-            Append(dynamicArray->GetElement(i));
+        for (int i = 0; i < newElements; i++) {
+            Set(oldSize + i, dynamicArray->GetElement(i));
         }
     }
 

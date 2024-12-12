@@ -6,6 +6,7 @@
 #include "file_writer.h"
 #include "sequence.h"
 #include "dynamic_array.h"
+#include "unique_pointer.h"
 #include "people.h"
 #include "comparings.h"
 #include "sortings.h"
@@ -299,8 +300,6 @@ void Menu()
 
                 const int max = 50000;
                 const int step = 5000;
-                int dots = 1000;
-
                 int iteration = 1;
 
                 DynamicArray<double> x(0);  // X - size
@@ -308,7 +307,7 @@ void Menu()
 
                 for (int i = step; i <= max; i += step)
                 {
-                    std::unique_ptr<DynamicArray<People>> peoples = std::make_unique<DynamicArray<People>>(i);
+                    UniquePointer<DynamicArray<People>> peoples(new DynamicArray<People>(i));
 
                     for (int j = 0; j < i; j++)
                     {
