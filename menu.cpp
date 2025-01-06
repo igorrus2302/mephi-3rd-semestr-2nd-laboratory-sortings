@@ -23,7 +23,8 @@ int Functions()
     cout << "2. Sort by one attribute\n";
     cout << "3. Sort by two attributes\n";
     cout << "4. Build graph\n";
-    cout << "5. Run functional tests\n\n";
+    cout << "5. Build all graphs on one page\n";
+    cout << "6. Run functional tests\n\n";
     cout << "Insert number of function:";
 
     int function;
@@ -93,7 +94,7 @@ void Menu()
 
     DynamicArray<People> dynamicArray;
 
-    Sorter<People> sorter;
+    ISorter<People>* sorter = new Sorter<People>();
 
     Sequence<People> *sequence = &dynamicArray;
 
@@ -108,6 +109,7 @@ void Menu()
                 continue;
 
             case (0):
+                delete sorter;
                 exit(0);
 
             case (1):
@@ -163,23 +165,23 @@ void Menu()
 
                 if (sortingChoice == 1)
                 {
-                    sorter.BubbleSort(sequence, compareFunction);
+                    sorter->BubbleSort(sequence, compareFunc);
                 }
                 else if (sortingChoice == 2)
                 {
-                    sorter.ShakerSort(sequence, compareFunction);
+                    sorter->ShakerSort(sequence, compareFunction);
                 }
                 else if (sortingChoice == 3)
                 {
-                    sorter.HeapSort(sequence, compareFunction);
+                    sorter->HeapSort(sequence, compareFunction);
                 }
                 else if (sortingChoice == 4)
                 {
-                    sorter.MergeSort(sequence, compareFunction);
+                    sorter->MergeSort(sequence, compareFunction);
                 }
                 else if (sortingChoice == 5)
                 {
-                    sorter.QuickSort(sequence, compareFunction);
+                    sorter->QuickSort(sequence, compareFunction);
                 }
                 else
                 {
@@ -258,23 +260,23 @@ void Menu()
 
                 if (sortingChoice == 1)
                 {
-                    sorter.BubbleSort(sequence, compareFunc);
+                    sorter->BubbleSort(sequence, compareFunc);
                 }
                 else if (sortingChoice == 2)
                 {
-                    sorter.ShakerSort(sequence, compareFunc);
+                    sorter->ShakerSort(sequence, compareFunc);
                 }
                 else if (sortingChoice == 3)
                 {
-                    sorter.HeapSort(sequence, compareFunc);
+                    sorter->HeapSort(sequence, compareFunc);
                 }
                 else if (sortingChoice == 4)
                 {
-                    sorter.MergeSort(sequence, compareFunc);
+                    sorter->MergeSort(sequence, compareFunc);
                 }
                 else if (sortingChoice == 5)
                 {
-                    sorter.QuickSort(sequence, compareFunc);
+                    sorter->QuickSort(sequence, compareFunc);
                 }
                 else
                 {
@@ -298,8 +300,8 @@ void Menu()
 
                 string name;
 
-                const int max = 50000;
-                const int step = 5000;
+                const int max = 100'000;
+                const int step = 1000;
                 int iteration = 1;
 
                 DynamicArray<double> x(0);  // X - size
@@ -319,27 +321,27 @@ void Menu()
 
                     if (sortingChoice == 1)
                     {
-                        sorter.BubbleSort(peoples.get(), CompareByAccountBalance);
+                        sorter->BubbleSort(peoples.get(), CompareByAccountBalance);
                         name = "Bubble Sort";
                     }
                     else if (sortingChoice == 2)
                     {
-                        sorter.ShakerSort(peoples.get(), CompareByAccountBalance);
+                        sorter->ShakerSort(peoples.get(), CompareByAccountBalance);
                         name = "Shaker Sort";
                     }
                     else if (sortingChoice == 3)
                     {
-                        sorter.HeapSort(peoples.get(), CompareByAccountBalance);
+                        sorter->HeapSort(peoples.get(), CompareByAccountBalance);
                         name = "Heap Sort";
                     }
                     else if (sortingChoice == 4)
                     {
-                        sorter.MergeSort(peoples.get(), CompareByAccountBalance);
+                        sorter->MergeSort(peoples.get(), CompareByAccountBalance);
                         name = "Merge Sort";
                     }
                     else if (sortingChoice == 5)
                     {
-                        sorter.QuickSort(peoples.get(), CompareByAccountBalance);
+                        sorter->QuickSort(peoples.get(), CompareByAccountBalance);
                         name = "Quick Sort";
                     }
                     else
@@ -367,11 +369,110 @@ void Menu()
                 break;
             }
             case (5):
+            {
+                const int max = 10000;
+                const int step = 1000;
+                int iteration = 1;
 
-                TestSorters();
+                DynamicArray<double> x(0);
+                DynamicArray<DynamicArray<double>> results(5);
+
+                std::vector<std::pair<int, std::string>> sortingOptions = {
+                        {1, "Bubble Sort"},
+                        {2, "Shaker Sort"},
+                        {3, "Heap Sort"},
+                        {4, "Merge Sort"},
+                        {5, "Quick Sort"}
+                };
+
+                for (int i = step; i <= max; i += step)
+                {
+                    UniquePointer<DynamicArray<People>> peoples(new DynamicArray<People>(i));
+
+                    for (int j = 0; j < i; j++)
+                    {
+                        (*peoples)[j] = People();
+                    }
+
+                    x.Append(i);
+
+                    for (const auto& [choice, name] : sortingOptions)
+                    {
+                        cout << "Sorting with " << name << "\n";
+
+                        DynamicArray<People> temp = *peoples;
+
+                        start = chrono::high_resolution_clock::now();
+
+                        if (choice == 1)
+                            sorter->BubbleSort(&temp, CompareByAccountBalance);
+                        else if (choice == 2)
+                            sorter->ShakerSort(&temp, CompareByAccountBalance);
+                        else if (choice == 3)
+                            sorter->HeapSort(&temp, CompareByAccountBalance);
+                        else if (choice == 4)
+                            sorter->MergeSort(&temp, CompareByAccountBalance);
+                        else if (choice == 5)
+                            sorter->QuickSort(&temp, CompareByAccountBalance);
+
+                        end = chrono::high_resolution_clock::now();
+                        duration = end - start;
+
+                        if (results[choice - 1].GetLength() == 0)
+                        {
+                            results[choice - 1] = DynamicArray<double>(0);
+                        }
+
+                        results[choice - 1].Append(duration.count());
+
+                        cout << iteration << ") " << name << ": Sorting " << i << " elements took " << duration.count() << " seconds.\n\n";
+                    }
+
+                    iteration++;
+                }
+
+                cout << "Plotting Graph\n\n";
+
+                BuildComparisonGraph(x, results);
+
+                cout << "Graph has been successfully built!\n\n";
+                break;
+            }
+            case (6):
+
+                ISorter<int>* sorting = new Sorter<int>();
+
+                TestComparators();
+
+                TestSortingAlgorithms();
+                cout << "\n";
+
+                TestQuadraticBehavior(*sorting);
+                cout << "\n";
+
+                std::cout << "Testing QuickSort:" << std::endl;
+                TestSortingEdgeCases(*sorting, &ISorter<int>::QuickSort);
+                cout << "\n";
+
+                std::cout << "Testing HeapSort:" << std::endl;
+                TestSortingEdgeCases(*sorting, &ISorter<int>::HeapSort);
+                cout << "\n";
+
+                std::cout << "Testing MergeSort:" << std::endl;
+                TestSortingEdgeCases(*sorting, &ISorter<int>::MergeSort);
+                cout << "\n";
+
+                std::cout << "Testing ShakerSort:" << std::endl;
+                TestSortingEdgeCases(*sorting, &ISorter<int>::ShakerSort);
+                cout << "\n";
+
+                std::cout << "Testing BubbleSort:" << std::endl;
+                TestSortingEdgeCases(*sorting, &ISorter<int>::BubbleSort);
 
                 cout << "\n\n";
+                delete sorting;
                 break;
         }
     }
+    delete sorter;
 }

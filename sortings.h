@@ -20,44 +20,44 @@ private:
         }
     }
 
-    int Partition(int low, int high, Sequence<T>* sequence, int (*cmp)(const T&, const T&))
+    int Partition(int lowIndex, int highIndex, Sequence<T>* sequence, int (*cmp)(const T&, const T&))
     {
-        T pivot = sequence->GetElement(high);
-        int i = low - 1;
+        T pivotValue = sequence->GetElement(highIndex);
+        int partitionIndex = lowIndex - 1;
 
-        for (int j = low; j < high; j++)
+        for (int currentIndex = lowIndex; currentIndex < highIndex; currentIndex++)
         {
-            if (cmp(sequence->GetElement(j), pivot) < 0)
+            if (cmp(sequence->GetElement(currentIndex), pivotValue) < 0)
             {
-                i++;
-                sequence->Swap(i, j);
+                partitionIndex++;
+                sequence->Swap(partitionIndex, currentIndex);
             }
         }
 
-        i++;
-        sequence->Swap(i, high);
-        return i;
+        partitionIndex++;
+        sequence->Swap(partitionIndex, highIndex);
+        return partitionIndex;
     }
 
     // HeapSort
-    void SiftDown(int n, int i, Sequence<T>* sequence, int (*cmp)(const T&, const T&))
+    void SiftDown(int heapSize, int parentIndex, Sequence<T>* sequence, int (*cmp)(const T&, const T&))
     {
-        int largest = i;
-        int left = 2 * i + 1;
-        int right = 2 * i + 2;
+        int largestIndex = parentIndex;
+        int leftChildIndex = 2 * parentIndex + 1;
+        int rightChildIndex = 2 * parentIndex + 2;
 
-        if (left < n && cmp(sequence->GetElement(left), sequence->GetElement(largest)) > 0)
+        if (leftChildIndex < heapSize && cmp(sequence->GetElement(leftChildIndex), sequence->GetElement(largestIndex)) > 0)
         {
-            largest = left;
+            largestIndex = leftChildIndex;
         }
-        if (right < n && cmp(sequence->GetElement(right), sequence->GetElement(largest)) > 0)
+        if (rightChildIndex < heapSize && cmp(sequence->GetElement(rightChildIndex), sequence->GetElement(largestIndex)) > 0)
         {
-            largest = right;
+            largestIndex = rightChildIndex;
         }
-        if (largest != i)
+        if (largestIndex != parentIndex)
         {
-            sequence->Swap(i, largest);
-            SiftDown(n, largest, sequence, cmp);
+            sequence->Swap(parentIndex, largestIndex);
+            SiftDown(heapSize, largestIndex, sequence, cmp);
         }
     }
 
@@ -73,47 +73,47 @@ private:
         }
     }
 
-    void Merge(int low, int middle, int high, Sequence<T>* sequence, int (*cmp)(const T&, const T&))
+    void Merge(int startIndex, int midIndex, int endIndex, Sequence<T>* sequence, int (*cmp)(const T&, const T&))
     {
-        int size1 = middle - low + 1;
-        int size2 = high - middle;
+        int leftSize = midIndex - startIndex + 1;
+        int rightSize = endIndex - midIndex;
 
-        DynamicArray<T> left(size1);
-        DynamicArray<T> right(size2);
+        DynamicArray<T> leftSubsequence(leftSize);
+        DynamicArray<T> rightSubsequence(rightSize);
 
-        for (int i = 0; i < size1; i++)
-            left.Set(i, sequence->GetElement(low + i));
-        for (int i = 0; i < size2; i++)
-            right.Set(i, sequence->GetElement(middle + 1 + i));
+        for (int leftIndex = 0; leftIndex < leftSize; leftIndex++)
+            leftSubsequence.Set(leftIndex, sequence->GetElement(startIndex + leftIndex));
+        for (int rightIndex = 0; rightIndex < rightSize; rightIndex++)
+            rightSubsequence.Set(rightIndex, sequence->GetElement(midIndex + 1 + rightIndex));
 
-        int i = 0, j = 0, k = low;
+        int leftIndex = 0, rightIndex = 0, mergedIndex = startIndex;
 
-        while (i < size1 && j < size2)
+        while (leftIndex < leftSize && rightIndex < rightSize)
         {
-            if (cmp(left.GetElement(i), right.GetElement(j)) <= 0)
+            if (cmp(leftSubsequence.GetElement(leftIndex), rightSubsequence.GetElement(rightIndex)) <= 0)
             {
-                sequence->Set(k, left.GetElement(i));
-                i++;
+                sequence->Set(mergedIndex, leftSubsequence.GetElement(leftIndex));
+                leftIndex++;
             }
             else
             {
-                sequence->Set(k, right.GetElement(j));
-                j++;
+                sequence->Set(mergedIndex, rightSubsequence.GetElement(rightIndex));
+                rightIndex++;
             }
-            k++;
+            mergedIndex++;
         }
 
-        while (i < size1)
+        while (leftIndex < leftSize)
         {
-            sequence->Set(k, left.GetElement(i));
-            i++;
-            k++;
+            sequence->Set(mergedIndex, leftSubsequence.GetElement(leftIndex));
+            leftIndex++;
+            mergedIndex++;
         }
-        while (j < size2)
+        while (rightIndex < rightSize)
         {
-            sequence->Set(k, right.GetElement(j));
-            j++;
-            k++;
+            sequence->Set(mergedIndex, rightSubsequence.GetElement(rightIndex));
+            rightIndex++;
+            mergedIndex++;
         }
     }
 
@@ -158,14 +158,14 @@ private:
     // BubbleSort
     void BubbleSorting(Sequence<T>* sequence, int (*cmp)(const T&, const T&))
     {
-        int n = sequence->GetLength();
-        for (int i = 0; i < n - 1; ++i)
+        int sequenceSize = sequence->GetLength();
+        for (int passIndex = 0; passIndex < sequenceSize - 1; ++passIndex)
         {
-            for (int j = 0; j < n - i - 1; ++j)
+            for (int currentIndex = 0; currentIndex < sequenceSize - passIndex - 1; ++currentIndex)
             {
-                if (cmp(sequence->GetElement(j), sequence->GetElement(j + 1)) > 0)
+                if (cmp(sequence->GetElement(currentIndex), sequence->GetElement(currentIndex + 1)) > 0)
                 {
-                    sequence->Swap(j, j + 1);
+                    sequence->Swap(currentIndex, currentIndex + 1);
                 }
             }
         }
