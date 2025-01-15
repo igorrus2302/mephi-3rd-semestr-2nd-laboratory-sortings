@@ -4,64 +4,93 @@
 #include "sequence.h"
 #include "dynamic_array.h"
 
+
 template <typename T>
-class Sorter : public ISorter<T> {
+class BubbleSorter : public ISorter<T>{
+public:
+
+    void Sort(Sequence<T>* sequence, int (*cmp)(const T&, const T&)) override {
+        BubbleSort(sequence, cmp);
+    }
 
 private:
 
-    // QuickSort
-    void QuickSort(int low, int high, Sequence<T>* sequence, int (*cmp)(const T&, const T&))
+    void BubbleSort(Sequence<T>* sequence, int (*cmp)(const T&, const T&))
     {
-        if (low < high)
+        int sequenceSize = sequence->GetLength();
+        for (int passIndex = 0; passIndex < sequenceSize - 1; ++passIndex)
         {
-            int pivot = Partition(low, high, sequence, cmp);
-            QuickSort(low, pivot - 1, sequence, cmp);
-            QuickSort(pivot + 1, high, sequence, cmp);
-        }
-    }
-
-    int Partition(int lowIndex, int highIndex, Sequence<T>* sequence, int (*cmp)(const T&, const T&))
-    {
-        T pivotValue = sequence->GetElement(highIndex);
-        int partitionIndex = lowIndex - 1;
-
-        for (int currentIndex = lowIndex; currentIndex < highIndex; currentIndex++)
-        {
-            if (cmp(sequence->GetElement(currentIndex), pivotValue) < 0)
+            for (int currentIndex = 0; currentIndex < sequenceSize - passIndex - 1; ++currentIndex)
             {
-                partitionIndex++;
-                sequence->Swap(partitionIndex, currentIndex);
+                if (cmp(sequence->GetElement(currentIndex), sequence->GetElement(currentIndex + 1)) > 0)
+                {
+                    sequence->Swap(currentIndex, currentIndex + 1);
+                }
             }
         }
+    }
+};
 
-        partitionIndex++;
-        sequence->Swap(partitionIndex, highIndex);
-        return partitionIndex;
+
+template <typename T>
+class ShakerSorter : public ISorter<T>{
+public:
+
+    void Sort(Sequence<T>* sequence, int (*cmp)(const T&, const T&)) override {
+        ShakerSort(sequence, cmp);
     }
 
-    // HeapSort
-    void SiftDown(int heapSize, int parentIndex, Sequence<T>* sequence, int (*cmp)(const T&, const T&))
+private:
+
+    void ShakerSort(Sequence<T>* sequence, int (*cmp)(const T&, const T&))
     {
-        int largestIndex = parentIndex;
-        int leftChildIndex = 2 * parentIndex + 1;
-        int rightChildIndex = 2 * parentIndex + 2;
+        int n = sequence->GetLength();
+        bool swapped = true;
+        int start = 0, end = n - 1;
 
-        if (leftChildIndex < heapSize && cmp(sequence->GetElement(leftChildIndex), sequence->GetElement(largestIndex)) > 0)
+        while (swapped)
         {
-            largestIndex = leftChildIndex;
-        }
-        if (rightChildIndex < heapSize && cmp(sequence->GetElement(rightChildIndex), sequence->GetElement(largestIndex)) > 0)
-        {
-            largestIndex = rightChildIndex;
-        }
-        if (largestIndex != parentIndex)
-        {
-            sequence->Swap(parentIndex, largestIndex);
-            SiftDown(heapSize, largestIndex, sequence, cmp);
+            swapped = false;
+
+            for (int i = start; i < end; ++i)
+            {
+                if (cmp(sequence->GetElement(i), sequence->GetElement(i + 1)) > 0)
+                {
+                    sequence->Swap(i, i + 1);
+                    swapped = true;
+                }
+            }
+
+            if (!swapped) break;
+
+            --end;
+            swapped = false;
+
+            for (int i = end - 1; i >= start; --i)
+            {
+                if (cmp(sequence->GetElement(i), sequence->GetElement(i + 1)) > 0)
+                {
+                    sequence->Swap(i, i + 1);
+                    swapped = true;
+                }
+            }
+
+            ++start;
         }
     }
+};
 
-    // MergeSort
+
+template <typename T>
+class MergeSorter : public ISorter<T>{
+public:
+
+    void Sort(Sequence<T>* sequence, int (*cmp)(const T&, const T&)) override {
+        MergeSort(0, sequence->GetLength() - 1, sequence, cmp);
+    }
+
+private:
+
     void MergeSort(int low, int high, Sequence<T>* sequence, int (*cmp)(const T&, const T&))
     {
         if (low < high)
@@ -109,6 +138,7 @@ private:
             leftIndex++;
             mergedIndex++;
         }
+
         while (rightIndex < rightSize)
         {
             sequence->Set(mergedIndex, rightSubsequence.GetElement(rightIndex));
@@ -116,69 +146,43 @@ private:
             mergedIndex++;
         }
     }
+};
 
-    // ShakerSort
-    void ShakerSorting(Sequence<T>* sequence, int (*cmp)(const T&, const T&))
-    {
-        int n = sequence->GetLength();
-        bool swapped = true;
-        int start = 0, end = n - 1;
 
-        while (swapped)
-        {
-            swapped = false;
-
-            for (int i = start; i < end; ++i)
-            {
-                if (cmp(sequence->GetElement(i), sequence->GetElement(i + 1)) > 0)
-                {
-                    sequence->Swap(i, i + 1);
-                    swapped = true;
-                }
-            }
-
-            if (!swapped) break;
-
-            --end;
-            swapped = false;
-
-            for (int i = end - 1; i >= start; --i)
-            {
-                if (cmp(sequence->GetElement(i), sequence->GetElement(i + 1)) > 0)
-                {
-                    sequence->Swap(i, i + 1);
-                    swapped = true;
-                }
-            }
-
-            ++start;
-        }
-    }
-
-    // BubbleSort
-    void BubbleSorting(Sequence<T>* sequence, int (*cmp)(const T&, const T&))
-    {
-        int sequenceSize = sequence->GetLength();
-        for (int passIndex = 0; passIndex < sequenceSize - 1; ++passIndex)
-        {
-            for (int currentIndex = 0; currentIndex < sequenceSize - passIndex - 1; ++currentIndex)
-            {
-                if (cmp(sequence->GetElement(currentIndex), sequence->GetElement(currentIndex + 1)) > 0)
-                {
-                    sequence->Swap(currentIndex, currentIndex + 1);
-                }
-            }
-        }
-    }
-
+template <typename T>
+class HeapSorter : public ISorter<T>{
 public:
 
-    void QuickSort(Sequence<T>* sequence, int (*cmp)(const T&, const T&)) override
-    {
-        QuickSort(0, sequence->GetLength() - 1, sequence, cmp);
+    void Sort(Sequence<T>* sequence, int (*cmp)(const T&, const T&)) override {
+        HeapSort(sequence, cmp);
     }
 
-    void HeapSort(Sequence<T>* sequence, int (*cmp)(const T&, const T&)) override
+private:
+
+    void SiftDown(int heapSize, int parentIndex, Sequence<T>* sequence, int (*cmp)(const T&, const T&))
+    {
+        int largestIndex = parentIndex;
+        int leftChildIndex = 2 * parentIndex + 1;
+        int rightChildIndex = 2 * parentIndex + 2;
+
+        if (leftChildIndex < heapSize && cmp(sequence->GetElement(leftChildIndex), sequence->GetElement(largestIndex)) > 0)
+        {
+            largestIndex = leftChildIndex;
+        }
+
+        if (rightChildIndex < heapSize && cmp(sequence->GetElement(rightChildIndex), sequence->GetElement(largestIndex)) > 0)
+        {
+            largestIndex = rightChildIndex;
+        }
+
+        if (largestIndex != parentIndex)
+        {
+            sequence->Swap(parentIndex, largestIndex);
+            SiftDown(heapSize, largestIndex, sequence, cmp);
+        }
+    }
+
+    void HeapSort(Sequence<T>* sequence, int (*cmp)(const T&, const T&))
     {
         int n = sequence->GetLength();
 
@@ -190,19 +194,45 @@ public:
             SiftDown(i, 0, sequence, cmp);
         }
     }
+};
 
-    void MergeSort(Sequence<T>* sequence, int (*cmp)(const T&, const T&)) override
-    {
-        MergeSort(0, sequence->GetLength() - 1, sequence, cmp);
+
+template <typename T>
+class QuickSorter : public ISorter<T>{
+public:
+
+    void Sort(Sequence<T>* sequence, int (*cmp)(const T&, const T&)) override {
+        QuickSort(0, sequence->GetLength() - 1, sequence, cmp);
     }
 
-    void ShakerSort(Sequence<T>* sequence, int (*cmp)(const T&, const T&)) override
+private:
+
+    void QuickSort(int low, int high, Sequence<T>* sequence, int (*cmp)(const T&, const T&))
     {
-        ShakerSorting(sequence, cmp);
+        if (low < high)
+        {
+            int pivot = Partition(low, high, sequence, cmp);
+            QuickSort(low, pivot - 1, sequence, cmp);
+            QuickSort(pivot + 1, high, sequence, cmp);
+        }
     }
 
-    void BubbleSort(Sequence<T>* sequence, int (*cmp)(const T&, const T&)) override
+    int Partition(int lowIndex, int highIndex, Sequence<T>* sequence, int (*cmp)(const T&, const T&))
     {
-        BubbleSorting(sequence, cmp);
+        T pivotValue = sequence->GetElement(highIndex);
+        int partitionIndex = lowIndex - 1;
+
+        for (int currentIndex = lowIndex; currentIndex < highIndex; currentIndex++)
+        {
+            if (cmp(sequence->GetElement(currentIndex), pivotValue) < 0)
+            {
+                partitionIndex++;
+                sequence->Swap(partitionIndex, currentIndex);
+            }
+        }
+
+        partitionIndex++;
+        sequence->Swap(partitionIndex, highIndex);
+        return partitionIndex;
     }
 };

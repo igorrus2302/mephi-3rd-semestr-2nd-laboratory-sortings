@@ -9,7 +9,7 @@
 #include "unique_pointer.h"
 #include "people.h"
 #include "comparings.h"
-#include "sortings.h"
+#include "isorter.h"
 #include "graph_builder.h"
 #include "functional_tests.h"
 
@@ -94,8 +94,6 @@ void Menu()
 
     DynamicArray<People> dynamicArray;
 
-    ISorter<People>* sorter = new Sorter<People>();
-
     Sequence<People> *sequence = &dynamicArray;
 
     while (isOpen)
@@ -109,7 +107,6 @@ void Menu()
                 continue;
 
             case (0):
-                delete sorter;
                 exit(0);
 
             case (1):
@@ -163,31 +160,35 @@ void Menu()
 
                 start = chrono::high_resolution_clock::now();
 
+                unique_ptr<ISorter<People>> sorter;
+
                 if (sortingChoice == 1)
                 {
-                    sorter->BubbleSort(sequence, compareFunc);
+                    sorter = make_unique<BubbleSorter<People>>();
                 }
                 else if (sortingChoice == 2)
                 {
-                    sorter->ShakerSort(sequence, compareFunction);
+                    sorter = make_unique<ShakerSorter<People>>();
                 }
                 else if (sortingChoice == 3)
                 {
-                    sorter->HeapSort(sequence, compareFunction);
+                    sorter = make_unique<HeapSorter<People>>();
                 }
                 else if (sortingChoice == 4)
                 {
-                    sorter->MergeSort(sequence, compareFunction);
+                    sorter = make_unique<MergeSorter<People>>();
                 }
                 else if (sortingChoice == 5)
                 {
-                    sorter->QuickSort(sequence, compareFunction);
+                    sorter = make_unique<QuickSorter<People>>();
                 }
                 else
                 {
                     cout << "Wrong sorting number input, please, try again\n\n";
                     break;
                 }
+
+                sorter->Sort(sequence, compareFunction);
 
                 end = chrono::high_resolution_clock::now();
                 duration = end - start;
@@ -258,31 +259,35 @@ void Menu()
                     break;
                 }
 
+                unique_ptr<ISorter<People>> sorter;
+
                 if (sortingChoice == 1)
                 {
-                    sorter->BubbleSort(sequence, compareFunc);
+                    sorter = make_unique<BubbleSorter<People>>();
                 }
                 else if (sortingChoice == 2)
                 {
-                    sorter->ShakerSort(sequence, compareFunc);
+                    sorter = make_unique<ShakerSorter<People>>();
                 }
                 else if (sortingChoice == 3)
                 {
-                    sorter->HeapSort(sequence, compareFunc);
+                    sorter = make_unique<HeapSorter<People>>();
                 }
                 else if (sortingChoice == 4)
                 {
-                    sorter->MergeSort(sequence, compareFunc);
+                    sorter = make_unique<MergeSorter<People>>();
                 }
                 else if (sortingChoice == 5)
                 {
-                    sorter->QuickSort(sequence, compareFunc);
+                    sorter = make_unique<QuickSorter<People>>();
                 }
                 else
                 {
-                    cout << "Wrong sorting number input, please, try again.\n\n";
+                    cout << "Wrong sorting number input, please, try again\n\n";
                     break;
                 }
+
+                sorter->Sort(sequence, compareFunc);
 
                 end = chrono::high_resolution_clock::now();
                 duration = end - start;
@@ -319,29 +324,31 @@ void Menu()
                     cout << "Sorting\n";
                     start = chrono::high_resolution_clock::now();
 
+                    unique_ptr<ISorter<People>> sorter;
+
                     if (sortingChoice == 1)
                     {
-                        sorter->BubbleSort(peoples.get(), CompareByAccountBalance);
+                        sorter = make_unique<BubbleSorter<People>>();
                         name = "Bubble Sort";
                     }
                     else if (sortingChoice == 2)
                     {
-                        sorter->ShakerSort(peoples.get(), CompareByAccountBalance);
+                        sorter = make_unique<ShakerSorter<People>>();
                         name = "Shaker Sort";
                     }
                     else if (sortingChoice == 3)
                     {
-                        sorter->HeapSort(peoples.get(), CompareByAccountBalance);
+                        sorter = make_unique<HeapSorter<People>>();
                         name = "Heap Sort";
                     }
                     else if (sortingChoice == 4)
                     {
-                        sorter->MergeSort(peoples.get(), CompareByAccountBalance);
+                        sorter = make_unique<MergeSorter<People>>();
                         name = "Merge Sort";
                     }
                     else if (sortingChoice == 5)
                     {
-                        sorter->QuickSort(peoples.get(), CompareByAccountBalance);
+                        sorter = make_unique<QuickSorter<People>>();
                         name = "Quick Sort";
                     }
                     else
@@ -349,6 +356,8 @@ void Menu()
                         cout << "Wrong sorting number input, please, try again.\n\n";
                         break;
                     }
+
+                    sorter->Sort(sequence, CompareByAccountBalance);
 
                     end = chrono::high_resolution_clock::now();
                     duration = end - start;
@@ -368,6 +377,7 @@ void Menu()
 
                 break;
             }
+
             case (5):
             {
                 const int max = 10000;
@@ -402,21 +412,27 @@ void Menu()
 
                         DynamicArray<People> temp = *peoples;
 
-                        start = chrono::high_resolution_clock::now();
+                        auto start = chrono::high_resolution_clock::now();
+
+                        unique_ptr<ISorter<People>> sorter;
 
                         if (choice == 1)
-                            sorter->BubbleSort(&temp, CompareByAccountBalance);
+                            sorter = make_unique<BubbleSorter<People>>();
                         else if (choice == 2)
-                            sorter->ShakerSort(&temp, CompareByAccountBalance);
+                            sorter = make_unique<ShakerSorter<People>>();
                         else if (choice == 3)
-                            sorter->HeapSort(&temp, CompareByAccountBalance);
+                            sorter = make_unique<HeapSorter<People>>();
                         else if (choice == 4)
-                            sorter->MergeSort(&temp, CompareByAccountBalance);
+                            sorter = make_unique<MergeSorter<People>>();
                         else if (choice == 5)
-                            sorter->QuickSort(&temp, CompareByAccountBalance);
+                            sorter = make_unique<QuickSorter<People>>();
+                        else
+                            continue;
 
-                        end = chrono::high_resolution_clock::now();
-                        duration = end - start;
+                        sorter->Sort(&temp, CompareByAccountBalance);
+
+                        auto end = chrono::high_resolution_clock::now();
+                        chrono::duration<double> duration = end - start;
 
                         if (results[choice - 1].GetLength() == 0)
                         {
@@ -425,7 +441,8 @@ void Menu()
 
                         results[choice - 1].Append(duration.count());
 
-                        cout << iteration << ") " << name << ": Sorting " << i << " elements took " << duration.count() << " seconds.\n\n";
+                        cout << iteration << ") " << name << ": Sorting " << i << " elements took "
+                             << duration.count() << " seconds.\n\n";
                     }
 
                     iteration++;
@@ -440,39 +457,45 @@ void Menu()
             }
             case (6):
 
-                ISorter<int>* sorting = new Sorter<int>();
-
                 TestComparators();
 
                 TestSortingAlgorithms();
                 cout << "\n";
 
-                TestQuadraticBehavior(*sorting);
+                {
+                    QuickSorter<int> quickSorter;
+                    TestQuadraticBehavior(quickSorter);
+                }
                 cout << "\n";
 
-                std::cout << "Testing QuickSort:" << std::endl;
-                TestSortingEdgeCases(*sorting, &ISorter<int>::QuickSort);
-                cout << "\n";
+                {
+                    std::cout << "Testing QuickSort:" << std::endl;
+                    QuickSorter<int> quickSorter;
+                    TestSortingEdgeCases(quickSorter);
+                    cout << "\n";
 
-                std::cout << "Testing HeapSort:" << std::endl;
-                TestSortingEdgeCases(*sorting, &ISorter<int>::HeapSort);
-                cout << "\n";
+                    std::cout << "Testing HeapSort:" << std::endl;
+                    HeapSorter<int> heapSorter;
+                    TestSortingEdgeCases(heapSorter);
+                    cout << "\n";
 
-                std::cout << "Testing MergeSort:" << std::endl;
-                TestSortingEdgeCases(*sorting, &ISorter<int>::MergeSort);
-                cout << "\n";
+                    std::cout << "Testing MergeSort:" << std::endl;
+                    MergeSorter<int> mergeSorter;
+                    TestSortingEdgeCases(mergeSorter);
+                    cout << "\n";
 
-                std::cout << "Testing ShakerSort:" << std::endl;
-                TestSortingEdgeCases(*sorting, &ISorter<int>::ShakerSort);
-                cout << "\n";
+                    std::cout << "Testing ShakerSort:" << std::endl;
+                    ShakerSorter<int> shakerSorter;
+                    TestSortingEdgeCases(shakerSorter);
+                    cout << "\n";
 
-                std::cout << "Testing BubbleSort:" << std::endl;
-                TestSortingEdgeCases(*sorting, &ISorter<int>::BubbleSort);
+                    std::cout << "Testing BubbleSort:" << std::endl;
+                    BubbleSorter<int> bubbleSorter;
+                    TestSortingEdgeCases(bubbleSorter);
+                }
 
                 cout << "\n\n";
-                delete sorting;
                 break;
         }
     }
-    delete sorter;
 }

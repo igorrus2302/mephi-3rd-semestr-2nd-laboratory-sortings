@@ -11,9 +11,7 @@
 void TestComparators();
 void TestSortingAlgorithms();
 void TestQuadraticBehavior(ISorter<int>& sorter);
-void TestSortingEdgeCases(
-        ISorter<int>& sorter,
-        void (ISorter<int>::*sortFunction)(Sequence<int>*, int (*)(const int&, const int&)));
+void TestSortingEdgeCases(ISorter<int>& sorter);
 
 template <typename T>
 bool IsSorted1(Sequence<T>* sequence, int (*cmp)(const T&, const T&)) {

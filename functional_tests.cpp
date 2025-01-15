@@ -3,8 +3,10 @@
 #include <random>
 #include <algorithm>
 #include <vector>
+#include <cstring>
 #include <chrono>
 #include "sortings.h"
+#include "isorter.h"
 #include "people.h"
 #include "dynamic_array.h"
 #include "sequence.h"
@@ -23,9 +25,8 @@ std::vector<People> CreateTestPeople()
     };
 }
 
-void TestComparators()
-{
-    Sorter<People> sorter;
+void TestComparators() {
+    ISorter<People>* sorter; // Используем указатель на интерфейс
 
     int (*comparators[])(const People&, const People&) = {
             CompareByFirstName,
@@ -39,14 +40,6 @@ void TestComparators()
             "First Name", "Last Name", "Patronymic", "Birth Date", "Account Balance"
     };
 
-    void (Sorter<People>::*sortFunctions[])(Sequence<People>*, int (*)(const People&, const People&)) = {
-            &Sorter<People>::QuickSort,
-            &Sorter<People>::HeapSort,
-            &Sorter<People>::MergeSort,
-            &Sorter<People>::ShakerSort,
-            &Sorter<People>::BubbleSort
-    };
-
     const char* sortNames[] = {
             "QuickSort", "HeapSort", "MergeSort", "ShakerSort", "BubbleSort"
     };
@@ -54,40 +47,51 @@ void TestComparators()
     for (int c = 0; c < 5; c++) {
         std::cout << "Testing comparator: " << comparatorNames[c] << std::endl;
 
-        for (int s = 0; s < 5; s++)
-        {
-            std::vector<People> testData = CreateTestPeople();
+        for (int s = 0; s < 5; s++) {
+            // В зависимости от имени сортировки создаем объект сортировки
+            if (std::strcmp(sortNames[s], "QuickSort") == 0) {
+                sorter = new QuickSorter<People>();
+            } else if (std::strcmp(sortNames[s], "HeapSort") == 0) {
+                sorter = new HeapSorter<People>();
+            } else if (std::strcmp(sortNames[s], "MergeSort") == 0) {
+                sorter = new MergeSorter<People>();
+            } else if (std::strcmp(sortNames[s], "ShakerSort") == 0) {
+                sorter = new ShakerSorter<People>();
+            } else if (std::strcmp(sortNames[s], "BubbleSort") == 0) {
+                sorter = new BubbleSorter<People>();
+            } else {
+                continue; // Неизвестный алгоритм сортировки
+            }
 
+            // Создаем тестовые данные
+            std::vector<People> testData = CreateTestPeople();
             DynamicArray<People> array(testData.size());
-            for (size_t i = 0; i < testData.size(); i++)
-            {
+            for (size_t i = 0; i < testData.size(); i++) {
                 array.Set(i, testData[i]);
             }
 
             Sequence<People>* sequence = new DynamicArray<People>(array);
 
             std::cout << "  Running " << sortNames[s] << "... ";
-            (sorter.*sortFunctions[s])(sequence, comparators[c]);
+            sorter->Sort(sequence, comparators[c]);
 
-            if (IsSorted1(sequence, comparators[c]))
-            {
+            if (IsSorted1(sequence, comparators[c])) {
                 std::cout << "PASSED\n" << std::endl;
-            }
-            else
-            {
+            } else {
                 std::cout << "FAILED\n" << std::endl;
 
                 std::cout << "  Sequence after sorting:" << std::endl;
-                for (int i = 0; i < sequence->GetLength(); i++)
-                {
+                for (int i = 0; i < sequence->GetLength(); i++) {
                     std::cout << sequence->GetElement(i) << std::endl;
                 }
             }
 
             delete sequence;
+            delete sorter; // Удаляем сортировщик
         }
     }
 }
+
 
 int Compare(const int& a, const int& b)
 {
@@ -113,18 +117,11 @@ void TestSortingAlgorithms()
     std::random_device rd;
     std::default_random_engine rng(rd());
 
-    Sorter<int> sorter;
+    ISorter<int>* sorter;  // Используем указатель на интерфейс
 
     const char* sortNames[] = {"QuickSort", "HeapSort", "MergeSort", "ShakerSort", "BubbleSort"};
 
-    void (Sorter<int>::*sortFunctions[])(Sequence<int>*, int (*)(const int&, const int&)) = {
-            &Sorter<int>::QuickSort,
-            &Sorter<int>::HeapSort,
-            &Sorter<int>::MergeSort,
-            &Sorter<int>::ShakerSort,
-            &Sorter<int>::BubbleSort
-    };
-
+    // Создание фабрики для создания сортировщиков
     for (int i = 0; i < 5; ++i)
     {
         std::shuffle(testData.begin(), testData.end(), rng);
@@ -138,9 +135,24 @@ void TestSortingAlgorithms()
 
         Sequence<int>* sequence = new DynamicArray<int>(array);
 
+        // В зависимости от сортировки создаем соответствующий сортировщик
+        if (std::strcmp(sortNames[i], "QuickSort") == 0) {
+            sorter = new QuickSorter<int>();
+        } else if (std::strcmp(sortNames[i], "HeapSort") == 0) {
+            sorter = new HeapSorter<int>();
+        } else if (std::strcmp(sortNames[i], "MergeSort") == 0) {
+            sorter = new MergeSorter<int>();
+        } else if (std::strcmp(sortNames[i], "ShakerSort") == 0) {
+            sorter = new ShakerSorter<int>();
+        } else if (std::strcmp(sortNames[i], "BubbleSort") == 0) {
+            sorter = new BubbleSorter<int>();
+        } else {
+            continue; // Неизвестная сортировка
+        }
+
         std::cout << "Testing " << sortNames[i] << "...  ";
 
-        (sorter.*sortFunctions[i])(sequence, Compare);
+        sorter->Sort(sequence, Compare);  // Используем универсальный интерфейс
 
         if (IsSorted(sequence))
         {
@@ -152,6 +164,7 @@ void TestSortingAlgorithms()
         }
 
         delete sequence;
+        delete sorter;  // Удаляем сортировщик
     }
 }
 
@@ -197,8 +210,9 @@ void TestQuadraticBehavior(ISorter<int>& sorter)
 
     Sequence<int>* reversedSeq = GenerateReversedSequence(size);
 
+    // Засекаем время на сортировку перевернутой последовательности
     auto start = std::chrono::high_resolution_clock::now();
-    sorter.QuickSort(reversedSeq, CompareInt);
+    sorter.Sort(reversedSeq, CompareInt);  // Используем интерфейс сортировки
     auto end = std::chrono::high_resolution_clock::now();
 
     std::cout << "Time on reversed sequence: "
@@ -209,8 +223,9 @@ void TestQuadraticBehavior(ISorter<int>& sorter)
 
     Sequence<int>* almostSortedSeq = GenerateAlmostSortedSequence(size, size / 100);
 
+    // Засекаем время на сортировку почти отсортированной последовательности
     start = std::chrono::high_resolution_clock::now();
-    sorter.QuickSort(almostSortedSeq, CompareInt);
+    sorter.Sort(almostSortedSeq, CompareInt);  // Используем интерфейс сортировки
     end = std::chrono::high_resolution_clock::now();
 
     std::cout << "Time on almost sorted sequence: "
@@ -220,22 +235,23 @@ void TestQuadraticBehavior(ISorter<int>& sorter)
     delete almostSortedSeq;
 }
 
-void TestSortingEdgeCases(
-        ISorter<int>& sorter,
-        void (ISorter<int>::*sortFunction)(Sequence<int>*, int (*)(const int&, const int&))) {
+
+void TestSortingEdgeCases(ISorter<int>& sorter) {
     auto compare = [](const int& a, const int& b) { return (a < b) ? -1 : (a > b); };
 
+    // Тест для 0 элементов
     {
         auto* sequence = new DynamicArray<int>();
-        (sorter.*sortFunction)(sequence, compare);
+        sorter.Sort(sequence, compare);  // Используем универсальный метод Sort
         std::cout << "Test 0 elements: Passed" << std::endl;
         delete sequence;
     }
 
+    // Тест для 1 элемента
     {
         auto* sequence = new DynamicArray<int>();
         sequence->Append(42);
-        (sorter.*sortFunction)(sequence, compare);
+        sorter.Sort(sequence, compare);  // Используем универсальный метод Sort
 
         if (sequence->GetLength() == 1 && sequence->GetElement(0) == 42)
         {
@@ -248,11 +264,12 @@ void TestSortingEdgeCases(
         delete sequence;
     }
 
+    // Тест для 2 элементов
     {
         auto* sequence = new DynamicArray<int>();
         sequence->Append(42);
         sequence->Append(21);
-        (sorter.*sortFunction)(sequence, compare);
+        sorter.Sort(sequence, compare);  // Используем универсальный метод Sort
 
         if (sequence->GetLength() == 2 && sequence->GetElement(0) == 21 && sequence->GetElement(1) == 42)
         {
@@ -265,12 +282,13 @@ void TestSortingEdgeCases(
         delete sequence;
     }
 
+    // Тест для 3 элементов
     {
         auto* sequence = new DynamicArray<int>();
         sequence->Append(30);
         sequence->Append(10);
         sequence->Append(20);
-        (sorter.*sortFunction)(sequence, compare);
+        sorter.Sort(sequence, compare);  // Используем универсальный метод Sort
 
         if (sequence->GetLength() == 3 &&
             sequence->GetElement(0) == 10 &&
@@ -285,6 +303,7 @@ void TestSortingEdgeCases(
         delete sequence;
     }
 
+    // Тест для большого числа элементов
     {
         const int size = 1000;
         auto* sequence = new DynamicArray<int>();
@@ -294,7 +313,7 @@ void TestSortingEdgeCases(
             sequence->Append(i);
         }
 
-        (sorter.*sortFunction)(sequence, compare);
+        sorter.Sort(sequence, compare);  // Используем универсальный метод Sort
 
         bool passed = true;
         for (int i = 0; i < size; ++i)
